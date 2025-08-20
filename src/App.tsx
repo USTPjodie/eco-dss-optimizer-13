@@ -22,6 +22,7 @@ import ImportData from "./pages/ImportData";
 import UserManagement from "./pages/UserManagement";
 import Settings from "./pages/Settings";
 import Logs from "./pages/Logs";
+import WteMonitoring from "./pages/WteMonitoring";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +104,11 @@ const App = () => (
             <Route path="/logs" element={
               <ProtectedRoute requiredModule="logs">
                 <Logs />
+              </ProtectedRoute>
+            } />
+            <Route path="/wte-monitor" element={
+              <ProtectedRoute requiredModule="wteMonitoring">
+                <WteMonitoring />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

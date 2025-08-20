@@ -37,6 +37,7 @@ const roleModuleAccess: Record<UserRole, ModuleAccess> = {
     settings: true,
     logs: true,
     dataManagement: true,
+    wteMonitoring: true,
   },
   municipal_analyst: {
     dashboard: true,
@@ -52,6 +53,7 @@ const roleModuleAccess: Record<UserRole, ModuleAccess> = {
     multiCriteriaAnalysis: false,
     policyAssistant: false,
     dataManagement: true,
+    wteMonitoring: true,
   },
   environmental_specialist: {
     dashboard: true,
@@ -67,6 +69,7 @@ const roleModuleAccess: Record<UserRole, ModuleAccess> = {
     financialAnalysis: false,
     multiCriteriaAnalysis: false,
     dataManagement: true,
+    wteMonitoring: true,
   },
   gis_planner: {
     dashboard: true,
@@ -82,6 +85,7 @@ const roleModuleAccess: Record<UserRole, ModuleAccess> = {
     multiCriteriaAnalysis: false,
     policyAssistant: false,
     dataManagement: true,
+    wteMonitoring: false,
   },
   technologist: {
     dashboard: true,
@@ -97,6 +101,7 @@ const roleModuleAccess: Record<UserRole, ModuleAccess> = {
     environmentalImpact: false,
     policyAssistant: false,
     dataManagement: true,
+    wteMonitoring: true,
   },
   policy_maker: {
     dashboard: true,
@@ -112,6 +117,7 @@ const roleModuleAccess: Record<UserRole, ModuleAccess> = {
     financialAnalysis: false,
     environmentalImpact: false,
     dataManagement: true,
+    wteMonitoring: false,
   },
   viewer: {
     dashboard: true,
@@ -127,6 +133,7 @@ const roleModuleAccess: Record<UserRole, ModuleAccess> = {
     multiCriteriaAnalysis: false,
     policyAssistant: false,
     dataManagement: false,
+    wteMonitoring: false,
   },
 };
 
@@ -145,6 +152,7 @@ const moduleRoutes: Record<string, string> = {
   settings: "/settings",
   logs: "/logs",
   dataManagement: "/data",
+  wteMonitoring: "/wte-monitor",
 };
 
 type AuthContextType = {
