@@ -1,6 +1,4 @@
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 
 export type UserRole = 
   | "super_admin" 
@@ -160,10 +158,8 @@ const moduleRoutes: Record<string, string> = {
 type AuthContextType = {
   isAuthenticated: boolean;
   user: User | null;
-  session: Session | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
   hasAccess: (module: string) => boolean;
   getAccessibleRoutes: () => string[];
   getModuleByRoute: (route: string) => string | undefined;
@@ -171,133 +167,120 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Mock user data for demonstration purposes
+const mockUsers = [
+  {
+    id: "1",
+    email: "admin@example.com",
+    password: "password",
+    name: "Super Admin",
+    role: "super_admin" as UserRole,
+  },
+  {
+    id: "2",
+    email: "analyst@example.com",
+    password: "password",
+    name: "Municipal Analyst",
+    role: "municipal_analyst" as UserRole,
+  },
+  {
+    id: "3",
+    email: "env@example.com",
+    password: "password",
+    name: "Environmental Specialist",
+    role: "environmental_specialist" as UserRole,
+  },
+  {
+    id: "4",
+    email: "gis@example.com",
+    password: "password",
+    name: "GIS Planner",
+    role: "gis_planner" as UserRole,
+  },
+  {
+    id: "5",
+    email: "tech@example.com",
+    password: "password",
+    name: "Technologist",
+    role: "technologist" as UserRole,
+  },
+  {
+    id: "6",
+    email: "policy@example.com",
+    password: "password",
+    name: "Policy Maker",
+    role: "policy_maker" as UserRole,
+  },
+  {
+    id: "7",
+    email: "viewer@example.com",
+    password: "password",
+    name: "Read-Only Viewer",
+    role: "viewer" as UserRole,
+  },
+];
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem("isLoggedIn") === "true";
+  });
+  
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-  // Fetch user profile and role from database
-  const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
-    try {
-      // Get profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", supabaseUser.id)
-        .single();
+  const login = async (email: string, password: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const foundUser = mockUsers.find(
+          (u) => u.email === email && u.password === password
+        );
 
-      // Get role
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", supabaseUser.id)
-        .single();
+        if (foundUser) {
+          const loggedInUser: User = {
+            id: foundUser.id,
+            email: foundUser.email,
+            name: foundUser.name,
+            role: foundUser.role,
+            lastLogin: new Date(),
+          };
 
-      if (profile && roleData) {
-        const userProfile: User = {
-          id: profile.id,
-          email: profile.email,
-          name: profile.name,
-          role: roleData.role as UserRole,
-          lastLogin: new Date(),
-        };
-        setUser(userProfile);
-        setIsAuthenticated(true);
-      }
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      setUser(null);
-      setIsAuthenticated(false);
-    }
-  };
-
-  useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        
-        if (session?.user) {
-          // Defer database calls to avoid blocking
-          setTimeout(() => {
-            fetchUserProfile(session.user);
-          }, 0);
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("user", JSON.stringify(loggedInUser));
+          
+          setIsAuthenticated(true);
+          setUser(loggedInUser);
+          
+          // Log the login activity (in a real app, this would be sent to a server)
+          console.log("Login activity:", {
+            userId: loggedInUser.id,
+            timestamp: new Date().toISOString(),
+            action: "LOGIN",
+          });
+          
+          resolve(true);
         } else {
-          setUser(null);
-          setIsAuthenticated(false);
+          resolve(false);
         }
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        fetchUserProfile(session.user);
-      }
-      setLoading(false);
+      }, 1000);
     });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const login = async (email: string, password: string) => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
-
-      if (data.user) {
-        await fetchUserProfile(data.user);
-        return { success: true };
-      }
-
-      return { success: false, error: "Login failed" };
-    } catch (error) {
-      return { success: false, error: "An unexpected error occurred" };
-    }
   };
 
-  const signup = async (email: string, password: string, name: string) => {
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            name,
-          },
-        },
+  const logout = () => {
+    // Log the logout activity
+    if (user) {
+      console.log("Logout activity:", {
+        userId: user.id,
+        timestamp: new Date().toISOString(),
+        action: "LOGOUT",
       });
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
-
-      if (data.user) {
-        return { success: true };
-      }
-
-      return { success: false, error: "Signup failed" };
-    } catch (error) {
-      return { success: false, error: "An unexpected error occurred" };
     }
-  };
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
+    
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("user");
     setIsAuthenticated(false);
+    setUser(null);
   };
 
   // Check if the current user has access to a specific module
@@ -326,19 +309,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return Object.keys(moduleRoutes).find(key => moduleRoutes[key] === route);
   };
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-    </div>;
-  }
-
   return (
     <AuthContext.Provider value={{ 
       isAuthenticated, 
-      user,
-      session,
-      login,
-      signup,
+      user, 
+      login, 
       logout, 
       hasAccess,
       getAccessibleRoutes,
