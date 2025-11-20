@@ -79,7 +79,7 @@ const WasteAnalysis = () => {
   const navigate = useNavigate();
 
   const navigateToSimulation = (district: typeof collectionEfficiencyData[0]) => {
-    navigate("/simulation", { 
+    navigate("/waste-analysis/simulation", { 
       state: { 
         district: district.name,
         wasteVolume: district.wasteVolume,
