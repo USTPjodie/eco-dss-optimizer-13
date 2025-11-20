@@ -55,14 +55,14 @@ const App = () => (
                 <PolicyAssistant />
               </ProtectedRoute>
             } />
-            <Route path="/simulation" element={
-              <ProtectedRoute requiredModule="scenarioSimulation">
-                <ScenarioSimulation />
-              </ProtectedRoute>
-            } />
             <Route path="/waste-analysis" element={
               <ProtectedRoute requiredModule="wasteAnalysis">
                 <WasteAnalysis />
+              </ProtectedRoute>
+            } />
+            <Route path="/waste-analysis/simulation" element={
+              <ProtectedRoute requiredModule="wasteAnalysis">
+                <ScenarioSimulation />
               </ProtectedRoute>
             } />
             <Route path="/financial" element={

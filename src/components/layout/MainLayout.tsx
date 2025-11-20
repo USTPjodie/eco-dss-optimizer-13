@@ -55,7 +55,6 @@ const navigationItems: NavigationItem[] = [
   { title: "Waste Analysis", href: "/waste-analysis", icon: Recycle, module: "wasteAnalysis" },
   { title: "Technology Comparison", href: "/compare", icon: Zap, module: "technologyComparison" },
   { title: "Site Suggestions", href: "/sites", icon: Map, module: "siteSuggestions" },
-  { title: "Scenario Simulation", href: "/simulation", icon: LineChart, module: "scenarioSimulation" },
   { title: "Financial Analysis", href: "/financial", icon: Calculator, module: "financialAnalysis" },
   { title: "Environmental Impact", href: "/environmental", icon: Trash2, module: "environmentalImpact" },
   { title: "Multi-Criteria Analysis", href: "/mcda", icon: Activity, module: "multiCriteriaAnalysis" },
