@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
@@ -19,11 +20,24 @@ import { useToast } from "@/components/ui/use-toast";
 
 const ScenarioSimulation = () => {
   const { toast } = useToast();
-  const [wasteVolume, setWasteVolume] = useState(200000);
-  const [organicPercentage, setOrganicPercentage] = useState(45);
-  const [recyclablePercentage, setRecyclablePercentage] = useState(30);
+  const location = useLocation();
+  const districtData = location.state as { district?: string; wasteVolume?: number; organicPercentage?: number; recyclablePercentage?: number } | null;
+  
+  const [districtName, setDistrictName] = useState(districtData?.district || "");
+  const [wasteVolume, setWasteVolume] = useState(districtData?.wasteVolume || 200000);
+  const [organicPercentage, setOrganicPercentage] = useState(districtData?.organicPercentage || 45);
+  const [recyclablePercentage, setRecyclablePercentage] = useState(districtData?.recyclablePercentage || 30);
   const [processingEfficiency, setProcessingEfficiency] = useState(70);
   const [selectedTechnology, setSelectedTechnology] = useState("gasification");
+
+  useEffect(() => {
+    if (districtData) {
+      toast({
+        title: "District Data Loaded",
+        description: `Simulation parameters set for ${districtData.district}`,
+      });
+    }
+  }, []);
 
   // Calculate results based on inputs
   const calculateResults = () => {
@@ -97,7 +111,9 @@ const ScenarioSimulation = () => {
     <MainLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold">Scenario Simulation</h1>
+          <h1 className="text-3xl font-bold">
+            Scenario Simulation {districtName && `- ${districtName}`}
+          </h1>
           <p className="text-muted-foreground mt-2">
             Model different waste-to-energy scenarios and analyze projected outcomes
           </p>

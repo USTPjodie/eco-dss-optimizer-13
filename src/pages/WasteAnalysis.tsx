@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const wasteCompositionData = [
   { name: "Organic", value: 45, color: "hsl(var(--primary))" },
@@ -34,12 +36,12 @@ const wasteGenerationData = [
 ];
 
 const collectionEfficiencyData = [
-  { name: "Urban Area A", efficiency: 92 },
-  { name: "Urban Area B", efficiency: 88 },
-  { name: "Suburban Area C", efficiency: 76 },
-  { name: "Suburban Area D", efficiency: 72 },
-  { name: "Rural Area E", efficiency: 65 },
-  { name: "Rural Area F", efficiency: 58 },
+  { name: "Urban Area A", efficiency: 92, wasteVolume: 85000, organicPct: 48, recyclablePct: 32 },
+  { name: "Urban Area B", efficiency: 88, wasteVolume: 72000, organicPct: 45, recyclablePct: 30 },
+  { name: "Suburban Area C", efficiency: 76, wasteVolume: 42000, organicPct: 50, recyclablePct: 28 },
+  { name: "Suburban Area D", efficiency: 72, wasteVolume: 38000, organicPct: 52, recyclablePct: 25 },
+  { name: "Rural Area E", efficiency: 65, wasteVolume: 18000, organicPct: 58, recyclablePct: 20 },
+  { name: "Rural Area F", efficiency: 58, wasteVolume: 15000, organicPct: 60, recyclablePct: 18 },
 ];
 
 const energyPotentialData = [
@@ -74,6 +76,19 @@ const energyPotentialData = [
 ];
 
 const WasteAnalysis = () => {
+  const navigate = useNavigate();
+
+  const navigateToSimulation = (district: typeof collectionEfficiencyData[0]) => {
+    navigate("/simulation", { 
+      state: { 
+        district: district.name,
+        wasteVolume: district.wasteVolume,
+        organicPercentage: district.organicPct,
+        recyclablePercentage: district.recyclablePct
+      } 
+    });
+  };
+
   return (
     <MainLayout>
       <div className="space-y-8">
@@ -293,6 +308,45 @@ const WasteAnalysis = () => {
                     <Bar dataKey="efficiency" fill="hsl(var(--accent))" name="Collection Efficiency" />
                   </BarChart>
                 </ResponsiveContainer>
+              </CardContent>
+            </Card>
+            
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>District Waste Analysis & Simulation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>District</TableHead>
+                      <TableHead>Annual Volume (tons)</TableHead>
+                      <TableHead>Organic (%)</TableHead>
+                      <TableHead>Recyclable (%)</TableHead>
+                      <TableHead>Collection Efficiency</TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {collectionEfficiencyData.map((district) => (
+                      <TableRow key={district.name}>
+                        <TableCell className="font-medium">{district.name}</TableCell>
+                        <TableCell>{district.wasteVolume.toLocaleString()}</TableCell>
+                        <TableCell>{district.organicPct}%</TableCell>
+                        <TableCell>{district.recyclablePct}%</TableCell>
+                        <TableCell>{district.efficiency}%</TableCell>
+                        <TableCell>
+                          <Button 
+                            size="sm" 
+                            onClick={() => navigateToSimulation(district)}
+                          >
+                            Run Simulation
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
             
